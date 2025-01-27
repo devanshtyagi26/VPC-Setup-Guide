@@ -155,17 +155,70 @@ An Availability Zone is a distinct location within an AWS Region that is enginee
 2. Repeat the process for `Public-Subnet-2`.
 
 #### Private Subnets
-
 1. Launch an EC2 instance in `Private-Subnet-1`:
-   - Select an AMI (e.g., Amazon Linux 2).
-   - Configure networking to use `Private-Subnet-1`.
-   - Do not assign a public IP address.
-2. Repeat the process for `Private-Subnet-2`.
+   - **Step 1**: Navigate to the EC2 Dashboard and click **Launch Instance**.
+   - **Step 2**: Choose an AMI (e.g., Amazon Linux 2 or Ubuntu).
+   - **Step 3**: Choose an instance type (e.g., `t2.micro`).
+   - **Step 4**: Configure instance details:
+     - **Network**: Select `My-VPC`.
+     - **Subnet**: Select `Private-Subnet-1`.
+     - **Auto-assign Public IP**: Disable.
+     - Leave other options as default or customize as needed.
+   - **Step 5**: Add storage (default is fine).
+   - **Step 6**: Add tags (optional, e.g., `Key: Name`, `Value: Private-Instance-1`).
+   - **Step 7**: Configure security group:
+     - Create or select a security group that allows SSH access from a specific IP or CIDR block.
+   - **Step 8**: Review and launch:
+     - Select an existing key pair or create a new one for SSH access.
+     - Click **Launch**.
+
+2. Repeat the process for `Private-Subnet-2`, selecting the corresponding subnet.
+
+---
+
+## Configure a Security Group for SSH Access
+
+### Step 1: Navigate to the Security Groups Section
+1. Log in to the **AWS Management Console**.
+2. Open the **VPC Dashboard** or **EC2 Dashboard**.
+3. On the left-hand navigation menu, click **Security Groups** under **Network & Security**.
+
+### Step 2: Create a New Security Group
+1. Click the **Create security group** button.
+2. Configure the following settings:
+   - **Name tag**: Enter a name for the security group (e.g., `Private-SSH-Access`).
+   - **Description**: Provide a description (e.g., `Allows SSH access from specific IP`).
+   - **VPC**: Select the VPC (`My-VPC`) where your instance resides.
+
+### Step 3: Configure Inbound Rules
+1. Under the **Inbound rules** section, click **Add rule**.
+2. Define the SSH rule as follows:
+   - **Type**: `SSH`.
+   - **Protocol**: `TCP` (auto-filled when SSH is selected).
+   - **Port Range**: `22`.
+   - **Source**: Select one of the following:
+     - **My IP**: Automatically fills in your current public IP address.
+     - **Custom**: Enter a specific IP or CIDR block. For example:
+       - Single IP: `203.0.113.25/32` (allows only this IP).
+       - CIDR Block: `192.168.1.0/24` (allows all IPs in this range).
+     - **Anywhere-IPv4 (Not recommended for private instances)**: `0.0.0.0/0` (allows SSH access from any IPv4 address).
+3. Click **Save rules**.
+
+### Step 4: (Optional) Configure Outbound Rules
+1. By default, all outbound traffic is allowed. If you need to restrict outbound traffic:
+   - Click the **Outbound rules** section.
+   - Add or modify rules as needed (e.g., limit outbound traffic to specific IPs or services).
+
+### Step 5: Attach the Security Group to Your Instance
+1. Navigate to the **EC2 Dashboard**.
+2. Select the instance where you want to apply the security group.
+3. Click **Actions** → **Security** → **Change security groups**.
+4. Select the `Private-SSH-Access` security group you just created.
+5. Click **Save**.
 
 ---
 
 ## Testing and Verification
-
 - Verify public instances have internet access via their public IPs.
 - Ensure private instances communicate only via the VPG.
 - Use SSH or ping to test connectivity between instances.
@@ -173,7 +226,6 @@ An Availability Zone is a distinct location within an AWS Region that is enginee
 ---
 
 ## Useful Links
-
 - [AWS VPC Documentation](https://docs.aws.amazon.com/vpc/latest/userguide/)
 - [AWS EC2 Documentation](https://docs.aws.amazon.com/ec2/latest/userguide/)
 - [AWS Internet Gateway Documentation](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html)
